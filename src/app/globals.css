@@ -3,26 +3,98 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tema base (neutral/gray) */
 :root {
-  --primary: oklch(0.205 0 0);   /* azul */
-  --secondary: oklch(0.97 0 0); /* azul oscuro */ --radius: 0.625rem; --background: oklch(1 0 0); --foreground: oklch(0.145 0 0); --card: oklch(1 0 0); --card-foreground: oklch(0.145 0 0); --popover: oklch(1 0 0); --popover-foreground: oklch(0.145 0 0); --primary-foreground: oklch(0.985 0 0); --secondary-foreground: oklch(0.205 0 0); --muted: oklch(0.97 0 0); --muted-foreground: oklch(0.556 0 0); --accent: oklch(0.97 0 0); --accent-foreground: oklch(0.205 0 0); --destructive: oklch(0.577 0.245 27.325); --border: oklch(0.922 0 0); --input: oklch(0.922 0 0); --ring: oklch(0.708 0 0); --chart-1: oklch(0.646 0.222 41.116); --chart-2: oklch(0.6 0.118 184.704); --chart-3: oklch(0.398 0.07 227.392); --chart-4: oklch(0.828 0.189 84.429); --chart-5: oklch(0.769 0.188 70.08); --sidebar: oklch(0.985 0 0); --sidebar-foreground: oklch(0.145 0 0); --sidebar-primary: oklch(0.205 0 0); --sidebar-primary-foreground: oklch(0.985 0 0); --sidebar-accent: oklch(0.97 0 0); --sidebar-accent-foreground: oklch(0.205 0 0); --sidebar-border: oklch(0.922 0 0); --sidebar-ring: oklch(0.708 0 0);
+  --primary: oklch(0.205 0 0);
+  --secondary: oklch(0.97 0 0);
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Tema Azul */
 [data-theme="blue"] {
-  --primary: #2563eb;
-  --secondary: #1e40af;
+  --primary: oklch(0.559 0.204 259.012); /* #2563eb */
+  --secondary: oklch(0.431 0.225 258.335); /* #1e40af */
+  --primary-foreground: oklch(1 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.559 0.204 259.012);
+  --accent: oklch(0.94 0.032 258.93); /* azul muy claro */
+  --accent-foreground: oklch(0.431 0.225 258.335);
 }
 
+/* Tema Verde */
 [data-theme="green"] {
-  --primary: #16a34a;
-  --secondary: #14532d;
+  --primary: oklch(0.608 0.179 142.495); /* #16a34a */
+  --secondary: oklch(0.338 0.147 142.713); /* #14532d */
+  --primary-foreground: oklch(1 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.608 0.179 142.495);
+  --accent: oklch(0.94 0.027 143.067); /* verde muy claro */
+  --accent-foreground: oklch(0.338 0.147 142.713);
 }
 
+/* Tema Rojo */
 [data-theme="red"] {
-  --primary: #dc2626;
-  --secondary: #991b1b;
+  --primary: oklch(0.577 0.245 27.325); /* #dc2626 */
+  --secondary: oklch(0.431 0.218 27.523); /* #991b1b */
+  --primary-foreground: oklch(1 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.577 0.245 27.325);
+  --accent: oklch(0.94 0.037 27.408); /* rojo muy claro */
+  --accent-foreground: oklch(0.431 0.218 27.523);
 }
 
+/* Tema Púrpura */
+[data-theme="purple"] {
+  --primary: oklch(0.559 0.230 292.958); /* #7c3aed */
+  --secondary: oklch(0.382 0.178 293.324); /* #581c87 */
+  --primary-foreground: oklch(1 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.559 0.230 292.958);
+  --accent: oklch(0.94 0.034 293.144); /* púrpura muy claro */
+  --accent-foreground: oklch(0.382 0.178 293.324);
+}
+
+/* Tema Naranja */
+[data-theme="orange"] {
+  --primary: oklch(0.696 0.199 70.67); /* #ea580c */
+  --secondary: oklch(0.478 0.177 70.756); /* #c2410c */
+  --primary-foreground: oklch(1 0 0);
+  --secondary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.696 0.199 70.67);
+  --accent: oklch(0.94 0.030 70.714); /* naranja muy claro */
+  --accent-foreground: oklch(0.478 0.177 70.756);
+}
+
+/* Variables de Tailwind */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -61,6 +133,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+/* Modo Oscuro */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -95,6 +168,32 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Temas en modo oscuro - ajustes específicos */
+.dark[data-theme="blue"] {
+  --primary: oklch(0.649 0.183 258.929); /* azul más brillante en oscuro */
+  --sidebar-primary: oklch(0.649 0.183 258.929);
+}
+
+.dark[data-theme="green"] {
+  --primary: oklch(0.698 0.161 142.827); /* verde más brillante en oscuro */
+  --sidebar-primary: oklch(0.698 0.161 142.827);
+}
+
+.dark[data-theme="red"] {
+  --primary: oklch(0.667 0.221 27.487); /* rojo más brillante en oscuro */
+  --sidebar-primary: oklch(0.667 0.221 27.487);
+}
+
+.dark[data-theme="purple"] {
+  --primary: oklch(0.649 0.207 293.115); /* púrpura más brillante en oscuro */
+  --sidebar-primary: oklch(0.649 0.207 293.115);
+}
+
+.dark[data-theme="orange"] {
+  --primary: oklch(0.786 0.179 70.827); /* naranja más brillante en oscuro */
+  --sidebar-primary: oklch(0.786 0.179 70.827);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -104,3 +203,21 @@
   }
 }
 
+/* Transiciones suaves para cambios de tema */
+:root,
+.dark,
+[data-theme] {
+  transition: 
+    color 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+/* Utilidades adicionales para transiciones en componentes */
+.theme-transition {
+  transition: 
+    color 0.3s ease,
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
