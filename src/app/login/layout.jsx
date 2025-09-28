@@ -1,3 +1,5 @@
+import DarkModeToggle from "@/components/atoms/DarkModeToggle"
+
 export const metadata = {
   title: "Iniciar sesión - Policonsultorio",
   description: "Acceso al sistema del policonsultorio",
@@ -6,8 +8,11 @@ export const metadata = {
 export default function LoginLayout({ children }) {
   return (
     <div className="min-h-screen flex">
+      {/* Botón de modo oscuro/claro */}
+      <DarkModeToggle />
+
       {/* Columna izquierda decorativa */}
-      <div className="hidden md:flex md:w-5/12 bg-primary text-white items-center justify-center relative">
+      <div className="hidden md:flex md:w-5/12 bg-primary text-primary-foreground items-center justify-center relative">
         <div className="absolute inset-0 opacity-20">
           <svg width="100%" height="100%" viewBox="0 0 500 500" preserveAspectRatio="none">
             <path
@@ -28,7 +33,7 @@ export default function LoginLayout({ children }) {
       </div>
 
       {/* Columna derecha con el login */}
-      <div className="flex-1 flex items-center justify-center bg-background">
+      <div className="flex-1 flex items-center justify-center bg-background theme-transition">
         {children}
       </div>
     </div>
