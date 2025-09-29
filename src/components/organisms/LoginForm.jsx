@@ -21,14 +21,30 @@ export default function LoginForm() {
     setError(null)
     setSuccess(false)
 
-    setTimeout(() => {
-      if (email === "test@test.com" && password === "123456") {
-        setSuccess(true)
-      } else {
-        setError("Credenciales inválidas")
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Error en login")
       }
+
+      const data = await res.json()
+      localStorage.setItem("token", data.token)
+      setSuccess(true)
+    } catch (err) {
+      setError("Credenciales inválidas")
+    } finally {
       setIsLoading(false)
-    }, 1200)
+    }
   }
 
   return (
@@ -89,6 +105,10 @@ export default function LoginForm() {
             )}
           </button>
         </div>
+        {/* 👇 Texto de recuperar contraseña (solo decorativo) */}
+        <p className="text-sm text-muted-foreground text-right cursor-pointer hover:underline">
+          ¿Has olvidado tu contraseña?
+        </p>
       </div>
 
       <Button
@@ -108,3 +128,4 @@ export default function LoginForm() {
     </form>
   )
 }
+
