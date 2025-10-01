@@ -4,16 +4,15 @@ import { useDarkMode } from "@/hooks/useTheme"
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-export default function DarkModeToggle({ className = "" }) {
+export function DarkModeToggle({ className = "" }) {
   const { isDark, toggleDarkMode, isClient } = useDarkMode()
 
-  // Evitar hidration mismatch
   if (!isClient) {
     return (
       <Button
         variant="ghost"
-        size="sm"
-        className={`absolute top-4 right-4 z-20 text-muted-foreground ${className}`}
+        size="icon"
+        className={`text-muted-foreground ${className}`}
         disabled
       >
         <Moon className="h-5 w-5" />
@@ -24,9 +23,9 @@ export default function DarkModeToggle({ className = "" }) {
   return (
     <Button
       variant="ghost"
-      size="sm"
+      size="icon"
       onClick={toggleDarkMode}
-      className={`absolute top-4 right-4 z-20 text-muted-foreground hover:text-foreground transition-colors ${className}`}
+      className={`text-muted-foreground hover:text-foreground transition-colors ${className}`}
       title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
     >
       {isDark ? (
