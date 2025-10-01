@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }) {
           <Link href="/dashboard/turnos" className="flex items-center gap-2">
             <Calendar className="h-5 w-5" /> {isOpen && "Turnos"}
           </Link>
-          <Link href="/dashboard/config" className="flex items-center gap-2">
+          <Link href="/dashboard/configuracion" className="flex items-center gap-2">
             <Settings className="h-5 w-5" /> {isOpen && "Configuración"}
           </Link>
         </nav>

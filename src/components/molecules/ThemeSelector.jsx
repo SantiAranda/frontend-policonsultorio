@@ -31,15 +31,13 @@ export default function ThemeSelector({ className = "" }) {
 
   const applyTheme = (theme) => {
     const root = document.documentElement
-    // Remover todos los temas anteriores
-    themes.forEach(t => {
-      if (t.value) root.removeAttribute(`data-theme`)
-    })
-    // Aplicar nuevo tema
-    if (theme) {
-      root.setAttribute("data-theme", theme)
+      if (!theme) {
+        root.removeAttribute("data-theme") // vuelve al base (gris)
+      } else {
+        root.setAttribute("data-theme", theme)
+      }
     }
-  }
+
 
   const handleThemeChange = (theme) => {
     setCurrentTheme(theme)
