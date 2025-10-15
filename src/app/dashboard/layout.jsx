@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Menu, User, Calendar, Settings } from "lucide-react"
+import { Menu, User, Calendar, Settings, Building } from "lucide-react"
 
 // Importamos el Header organism
 import { Header } from "@/components/organisms/Header"
@@ -38,6 +38,9 @@ export default function DashboardLayout({ children }) {
           </Link>
           <Link href="/dashboard/configuracion" className="flex items-center gap-2">
             <Settings className="h-5 w-5" /> {isOpen && "Configuración"}
+          </Link>
+          <Link href="/dashboard/obras-sociales" className="flex items-center gap-2">
+            <Building className="h-5 w-5" /> {isOpen && "Obras Sociales"}
           </Link>
         </nav>
       </aside>
