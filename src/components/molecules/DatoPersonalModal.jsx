@@ -61,9 +61,14 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
         estado: form.estado,
       }
 
+      const token = localStorage.getItem("token")
+
       const res = await fetch("http://localhost:8000/api/datos-personales", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
         body: JSON.stringify(body),
       })
 
