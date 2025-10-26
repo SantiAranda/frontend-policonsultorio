@@ -72,7 +72,7 @@ export default function ObrasSocialesPage() {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Obras Sociales</CardTitle>
         <Button onClick={() => router.push("/dashboard/obras-sociales/crear")}>
-          Crear Obra Social
+          Registrar Obra Social
         </Button>
       </CardHeader>
       <CardContent>

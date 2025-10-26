@@ -54,7 +54,7 @@ export default function CrearObraSocialPage() {
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Crear Nueva Obra Social</CardTitle>
+        <CardTitle>Registrar Nueva Obra Social</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
