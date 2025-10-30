@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Pencil, Trash2 } from "lucide-react"
 import { usePacientesStore } from "@/store/pacientes"
 import { DataTable } from "@/components/ui/data-table"
 import { columns as baseColumns } from "./columns"
@@ -19,7 +20,7 @@ import {
 export default function PacientesPage() {
   const { pacientes, loading, error, fetchPacientes, eliminarPaciente } = usePacientesStore()
   const [openModal, setOpenModal] = useState(false)
-  const [selectedPaciente, setSelectedPaciente] = useState(null)
+  const [pacienteAEditar, setPacienteAEditar] = useState(null)
   const [openConfirm, setOpenConfirm] = useState(false)
   const [pacienteAEliminar, setPacienteAEliminar] = useState(null)
 
@@ -27,26 +28,20 @@ export default function PacientesPage() {
     fetchPacientes()
   }, [fetchPacientes])
 
-  // --- HANDLERS PRINCIPALES ---
-
   const handleNuevo = () => {
-    setSelectedPaciente(null)
+    setPacienteAEditar(null)
     setOpenModal(true)
   }
 
   const handleEditar = (paciente) => {
-    setSelectedPaciente(paciente)
+    setPacienteAEditar(paciente)
     setOpenModal(true)
   }
 
   const handleCerrar = () => {
     setOpenModal(false)
-    setSelectedPaciente(null)
-  }
-
-  const handleGuardado = () => {
-    fetchPacientes() // refresca la tabla al guardar nuevo paciente
-    handleCerrar()
+    setPacienteAEditar(null)
+    // No refrescar automáticamente - el modal lo hará si se guardó algo
   }
 
   const handleEliminar = (paciente) => {
@@ -58,29 +53,33 @@ export default function PacientesPage() {
     await eliminarPaciente(pacienteAEliminar.idPacientes)
     setOpenConfirm(false)
     setPacienteAEliminar(null)
+    fetchPacientes() // Refrescar la tabla después de eliminar
   }
 
-  // --- COLUMNAS CON ACCIONES DINÁMICAS ---
+  // Columnas con acciones usando iconos
   const columns = baseColumns.map((col) => {
     if (col.id === "actions") {
       return {
         ...col,
         cell: ({ row }) => (
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-start">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => handleEditar(row.original)}
+              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              title="Editar paciente"
             >
-              Editar
+              <Pencil className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              className="text-red-600"
+              size="icon"
               onClick={() => handleEliminar(row.original)}
+              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+              title="Eliminar paciente"
             >
-              Eliminar
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         ),
@@ -93,7 +92,7 @@ export default function PacientesPage() {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Pacientes</h1>
-        <Button onClick={handleNuevo}>Nuevo Paciente</Button>
+        <Button onClick={handleNuevo}>+ Nuevo Paciente</Button>
       </div>
 
       <div className="rounded-md border">
@@ -108,9 +107,14 @@ export default function PacientesPage() {
       {/* Modal de crear/editar paciente */}
       <PacienteModal
         open={openModal}
-        onClose={handleCerrar}
-        onSave={handleGuardado}  // 🔥 Nuevo: refresca la tabla al guardar
-        paciente={selectedPaciente}
+        onClose={(seGuardo) => {
+          handleCerrar()
+          // Solo refrescar si se guardó algo
+          if (seGuardo) {
+            fetchPacientes()
+          }
+        }}
+        pacienteAEditar={pacienteAEditar}
       />
 
       {/* Modal de confirmación para eliminar */}

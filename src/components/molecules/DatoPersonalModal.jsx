@@ -1,14 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
 
-export default function DatoPersonalModal({ open, onClose, onGuardado }) {
-  const { toast } = useToast()
+export default function DatoPersonalModal({ open, onClose, onGuardado, datoAEditar = null }) {
 
   const [form, setForm] = useState({
     nombre: "",
@@ -24,6 +22,25 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState("")
   const [tipoMensaje, setTipoMensaje] = useState("")
+
+  // Cargar datos si estamos editando
+  useEffect(() => {
+    if (open && datoAEditar) {
+      console.log("📥 Cargando datos para editar:", datoAEditar)
+      setForm({
+        nombre: datoAEditar.nombre || "",
+        apellido: datoAEditar.apellido || "",
+        documento: datoAEditar.documento || "",
+        tipoDocumento: datoAEditar.tipoDocumento || "DNI",
+        genero: datoAEditar.genero || "Masculino",
+        fechaNacimiento: datoAEditar.fechaNacimiento?.split('T')[0] || "",
+        celular: datoAEditar.celular || "",
+        estado: datoAEditar.estado || "Activo",
+      })
+    } else if (open && !datoAEditar) {
+      limpiarCampos()
+    }
+  }, [open, datoAEditar])
 
   const limpiarCampos = () => {
     setForm({
@@ -61,10 +78,16 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
         estado: form.estado,
       }
 
+      const url = datoAEditar 
+        ? `http://localhost:8000/api/datos-personales/${datoAEditar.idDatosPersonales}`
+        : "http://localhost:8000/api/datos-personales"
+      
+      const method = datoAEditar ? "PUT" : "POST"
+
       const token = localStorage.getItem("token")
 
-      const res = await fetch("http://localhost:8000/api/datos-personales", {
-        method: "POST",
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`,
@@ -77,7 +100,7 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
       if (!res.ok) {
         console.error("Error del servidor:", data)
         throw new Error(
-          data?.message || "Error al guardar los datos personales"
+          data?.message || `Error al ${datoAEditar ? 'actualizar' : 'guardar'} los datos personales`
         )
       }
 
@@ -85,15 +108,8 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
       setGuardando(false)
 
       // Mostrar mensaje de éxito
-      setMensaje(`✅ Datos guardados correctamente: ${body.nombre} ${body.apellido}`)
+      setMensaje(`✅ Datos ${datoAEditar ? 'actualizados' : 'guardados'} correctamente: ${body.nombre} ${body.apellido}`)
       setTipoMensaje("success")
-
-      toast({
-        title: "✅ Datos personales guardados correctamente",
-        description: `${body.nombre} ${body.apellido}`,
-        variant: "success",
-        duration: 1500,
-      })
 
       onGuardado?.()
 
@@ -104,17 +120,11 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
         onClose()
       }, 5000)
     } catch (err) {
-      console.error("❌ Error al guardar datos personales:", err)
+      console.error(`❌ Error al ${datoAEditar ? 'actualizar' : 'guardar'} datos personales:`, err)
       
       // Mostrar mensaje de error
       setMensaje(`❌ Error: ${err.message}`)
       setTipoMensaje("error")
-      
-      toast({
-        title: "Error al guardar",
-        description: err.message,
-        variant: "destructive",
-      })
       
       // ❌ Cambiar estado después de error
       setGuardando(false)
@@ -132,7 +142,7 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Nuevo dato personal</DialogTitle>
+          <DialogTitle>{datoAEditar ? 'Editar dato personal' : 'Nuevo dato personal'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -216,7 +226,7 @@ export default function DatoPersonalModal({ open, onClose, onGuardado }) {
                 : "bg-gray-400 cursor-not-allowed"
             } text-white`}
           >
-            {guardando ? "⏳ Guardando..." : "💾 Guardar"}
+            {guardando ? "⏳ Guardando..." : `💾 ${datoAEditar ? 'Actualizar' : 'Guardar'}`}
           </Button>
 
           {mensaje && (

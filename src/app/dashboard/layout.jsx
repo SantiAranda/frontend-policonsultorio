@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }) {
           <Menu className="h-6 w-6" />
         </Button>
         <nav className="space-y-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard/pacientes" className="flex items-center gap-2">
             <User className="h-5 w-5" /> {isOpen && "Pacientes"}
           </Link>
           <Link href="/dashboard/turnos" className="flex items-center gap-2">

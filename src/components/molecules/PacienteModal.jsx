@@ -23,12 +23,11 @@ import { useObrasSocialesStore } from "@/store/obrasSociales"
 import DatoPersonalModal from  "@/components/molecules/DatoPersonalModal"
 
 
-export default function PacienteModal({ open, onClose }) {
+export default function PacienteModal({ open, onClose, pacienteAEditar = null }) {
   const { toast } = useToast()
   const { agregarPaciente } = usePacientesStore()
   const { obrasSociales, fetchObrasSociales } = useObrasSocialesStore()
 
-  // Estados
   const [datosPersonales, setDatosPersonales] = useState([])
   const [pacientes, setPacientes] = useState([])
   const [datoSeleccionado, setDatoSeleccionado] = useState(null)
@@ -36,12 +35,12 @@ export default function PacienteModal({ open, onClose }) {
   const [obraSocialSeleccionada, setObraSocialSeleccionada] = useState("")
   const [numAfiliado, setNumAfiliado] = useState("")
   const [abrirModalDato, setAbrirModalDato] = useState(false)
+  const [datoPersonalAEditar, setDatoPersonalAEditar] = useState(null)
   const [guardando, setGuardando] = useState(false)
   const [mensaje, setMensaje] = useState("")
   const [tipoMensaje, setTipoMensaje] = useState("")
+  const [seGuardo, setSeGuardo] = useState(false) // ⬅️ NUEVO: tracking si se guardó
   
-
-  // Traer datos personales y pacientes
   const fetchDatos = async () => {
     try {
       const resDatos = await fetch("http://localhost:8000/api/datos-personales")
@@ -62,147 +61,165 @@ export default function PacienteModal({ open, onClose }) {
     }
   }
 
-  // Resetear estados al abrir el modal
   useEffect(() => {
     if (open) {
       fetchDatos()
       fetchObrasSociales()
-      setDatoSeleccionado(null)
-      setEsParticular("")
-      setObraSocialSeleccionada("")
-      setNumAfiliado("")
+      setSeGuardo(false) // ⬅️ Resetear al abrir
+      
+      if (pacienteAEditar) {
+        // Modo edición: cargar datos del paciente
+        const idDato = pacienteAEditar.datosPersonales_idDatosPersonales || 
+                       pacienteAEditar.datos_personales?.idDatosPersonales ||
+                       pacienteAEditar.datosPersonales?.idDatosPersonales
+        
+        setDatoSeleccionado(String(idDato))
+        setEsParticular(pacienteAEditar.particular === 1 ? "si" : "no")
+        setObraSocialSeleccionada(String(pacienteAEditar.obrasSociales_idObrasSociales || ""))
+        setNumAfiliado(pacienteAEditar.numAfiliado || "")
+      } else {
+        // Modo creación: limpiar campos
+        setDatoSeleccionado(null)
+        setEsParticular("")
+        setObraSocialSeleccionada("")
+        setNumAfiliado("")
+      }
+      
       setMensaje("")
       setTipoMensaje("")
     }
-  }, [open])
+  }, [open, pacienteAEditar])
 
-  // Buscar obra social "Particular" después de cargar las obras sociales
   const obraSocialParticular = obrasSociales.find(os => 
     os.nombre?.toLowerCase().includes('particular') || 
     os.nombre?.toLowerCase().includes('sin obra')
   ) || obrasSociales[0]
 
-  console.log("🔍 Obra social Particular encontrada:", obraSocialParticular)
+  const datosFiltrados = pacienteAEditar 
+    ? datosPersonales // Si estamos editando, mostrar todos los datos
+    : datosPersonales.filter((dp) => {
+        const idDP = Number(dp.idDatosPersonales)
+        return !pacientes.some((p) => {
+          const idAsociado =
+            Number(p.datosPersonales_idDatosPersonales) ||
+            Number(p.datos_personales?.idDatosPersonales) ||
+            Number(p.datosPersonales?.idDatosPersonales) ||
+            null
+          return idAsociado === idDP
+        })
+      })
 
-  // Filtrar datos personales que no tengan paciente asociado
-  const datosFiltrados = datosPersonales.filter((dp) => {
-    const idDP = Number(dp.idDatosPersonales)
-    const tienePatiente = pacientes.some((p) => {
-      const idAsociado =
-        Number(p.datosPersonales_idDatosPersonales) ||
-        Number(p.datos_personales?.idDatosPersonales) ||
-        Number(p.datosPersonales?.idDatosPersonales) ||
-        null
-      return idAsociado === idDP
-    })
-    console.log(`Dato ${idDP} (${dp.nombre} ${dp.apellido}) - Tiene paciente: ${tienePatiente}`)
-    return !tienePatiente
-  })
-
-  // Validación para habilitar Guardar
   const puedeGuardar =
     datoSeleccionado &&
     esParticular !== "" &&
     (esParticular === "si" ||
       (esParticular === "no" && obraSocialSeleccionada && numAfiliado.trim() !== ""))
 
-  // Guardar paciente
+  const handleEditarDatoPersonal = () => {
+    // Primero intentar obtener del paciente directamente
+    let datoActual = pacienteAEditar?.datosPersonales || 
+                     pacienteAEditar?.datos_personales ||
+                     pacienteAEditar?.datosPersonales_idDatosPersonales
+
+    // Si es solo un ID, buscar en el array de datos personales
+    if (!datoActual || typeof datoActual === 'number') {
+      datoActual = datosPersonales.find(dp => dp.idDatosPersonales === Number(datoSeleccionado))
+    }
+
+    if (datoActual && datoActual.idDatosPersonales) {
+      console.log("📝 Editando dato personal:", datoActual)
+      setDatoPersonalAEditar(datoActual)
+      setAbrirModalDato(true)
+    } else {
+      console.error("❌ No se encontró el dato personal. datoSeleccionado:", datoSeleccionado)
+      toast({
+        title: "Error",
+        description: "No se encontró el dato personal para editar",
+        variant: "destructive"
+      })
+    }
+  }
+
+  const handleDatoPersonalGuardado = async () => {
+    // Refrescar datos personales después de editar
+    await fetchDatos()
+    setSeGuardo(true) // ⬅️ Marcar que hubo cambios
+  }
+
   const handleGuardar = async () => {
     setGuardando(true)
     setMensaje("")
     setTipoMensaje("")
 
     try {
+      const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
+      
       const body = {
         particular: esParticular === "si" ? 1 : 0,
         datosPersonales_idDatosPersonales: Number(datoSeleccionado),
-        // 🔧 Si es particular, usa obra social "Particular" o la primera disponible
         obrasSociales_idObrasSociales: esParticular === "si" 
-          ? Number(obraSocialParticular?.idObrasSociales || 1) // fallback a 1 si no encuentra
+          ? Number(obraSocialParticular?.idObrasSociales || 1)
           : Number(obraSocialSeleccionada),
-        // 🔧 Si es particular, envía "N/A" en vez de null
         numAfiliado: esParticular === "si" ? "N/A" : numAfiliado,
       }
 
-      console.log("📤 Enviando:", body)
-      console.log("🔍 Obra social particular usada:", obraSocialParticular)
+      // Solo agregar timestamps si estamos creando
+      if (!pacienteAEditar) {
+        body.created_at = now
+        body.updated_at = now
+      }
 
-      const res = await fetch("http://localhost:8000/api/pacientes", {
-        method: "POST",
+      const url = pacienteAEditar
+        ? `http://localhost:8000/api/pacientes/${pacienteAEditar.idPacientes}`
+        : "http://localhost:8000/api/pacientes"
+      
+      const method = pacienteAEditar ? "PUT" : "POST"
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
 
-      const data = await res.json()
+      const responseText = await res.text()
+      let data
+      
+      try {
+        data = JSON.parse(responseText)
+      } catch (e) {
+        throw new Error(`Error del servidor (Status ${res.status})`)
+      }
 
       if (!res.ok) {
-        console.error("❌ Error del servidor:", data)
-        console.log("Detalle completo:", JSON.stringify(data, null, 2))
-        throw new Error(data?.message || "Error al guardar el paciente")
+        throw new Error(data?.message || `Error al ${pacienteAEditar ? 'actualizar' : 'guardar'} el paciente`)
       }
 
-      console.log("✅ Paciente creado:", data)
-
-      // 🔧 CREAR USUARIO AUTOMÁTICAMENTE después de crear el paciente
-      try {
-        const datoPersonal = datosPersonales.find(dp => dp.idDatosPersonales === Number(datoSeleccionado))
-        const userBody = {
-          email: `paciente${datoSeleccionado}@temp.com`,
-          password: "1234",
-          rol: "paciente",
-          estado: "Activo",
-          datosPersonales_idDatosPersonales: Number(datoSeleccionado)
-        }
-
-        console.log("📤 Creando usuario:", userBody)
-
-        const resUser = await fetch("http://localhost:8000/api/usuarios", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userBody),
-        })
-
-        const dataUser = await resUser.json()
-
-        if (!resUser.ok) {
-          console.warn("⚠️ No se pudo crear el usuario:", dataUser)
-          // No lanzamos error, solo advertimos
-        } else {
-          console.log("✅ Usuario creado:", dataUser)
-        }
-      } catch (errUser) {
-        console.warn("⚠️ Error al crear usuario (no crítico):", errUser)
-        // Continuamos aunque falle la creación del usuario
-      }
-
-      // ✅ Éxito
       setGuardando(false)
-      setMensaje("✅ Paciente guardado correctamente")
+      setMensaje(`✅ Paciente ${pacienteAEditar ? 'actualizado' : 'guardado'} correctamente`)
       setTipoMensaje("success")
+      setSeGuardo(true) // ⬅️ Marcar que se guardó
 
       toast({ 
-        title: "✅ Paciente guardado correctamente", 
+        title: `✅ Paciente ${pacienteAEditar ? 'actualizado' : 'guardado'} correctamente`, 
         variant: "success",
         duration: 1500 
       })
 
-      await fetchDatos()
-
       // ⏱️ TIEMPO DE ESPERA ANTES DE CERRAR (en milisegundos)
       // 🔧 Para reducir el tiempo, cambia 5000 por otro valor (ej: 2000 = 2 segundos)
       setTimeout(() => {
-        onClose()
+        onClose(true) // ⬅️ Pasar true porque se guardó
       }, 5000)
 
     } catch (err) {
-      console.error("❌ Error al guardar paciente:", err)
+      console.error(`❌ Error al ${pacienteAEditar ? 'actualizar' : 'guardar'} paciente:`, err)
       
       setGuardando(false)
       setMensaje(`❌ Error: ${err.message}`)
       setTipoMensaje("error")
       
       toast({ 
-        title: "❌ Error al guardar el paciente", 
+        title: `❌ Error al ${pacienteAEditar ? 'actualizar' : 'guardar'} el paciente`, 
         description: err.message, 
         variant: "destructive" 
       })
@@ -210,19 +227,26 @@ export default function PacienteModal({ open, onClose }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog 
+      open={open} 
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onClose(seGuardo) // ⬅️ Pasar si se guardó al cerrar
+        }
+      }}
+    >
       <DialogContent className="max-w-md" aria-describedby="dialog-description">
         <DialogHeader>
-          <DialogTitle>Nuevo Paciente</DialogTitle>
+          <DialogTitle>{pacienteAEditar ? 'Editar Paciente' : 'Nuevo Paciente'}</DialogTitle>
           <DialogDescription id="dialog-description">
-            Complete los datos para registrar un nuevo paciente.
+            Complete los datos para {pacienteAEditar ? 'actualizar el' : 'registrar un nuevo'} paciente.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <label className="font-medium text-sm">Seleccionar datos personales</label>
 
-          {datosFiltrados.length === 0 && (
+          {datosFiltrados.length === 0 && !pacienteAEditar && (
             <p className="text-sm text-muted-foreground mb-2">
               No hay datos personales disponibles.
             </p>
@@ -231,6 +255,7 @@ export default function PacienteModal({ open, onClose }) {
           <Select
             value={datoSeleccionado ?? undefined}
             onValueChange={(val) => setDatoSeleccionado(val || null)}
+            disabled={!!pacienteAEditar}
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecciona un dato personal" />
@@ -244,14 +269,29 @@ export default function PacienteModal({ open, onClose }) {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="outline"
-            onClick={() => setAbrirModalDato(true)}
-            disabled={datoSeleccionado !== null}
-            className="mt-2 w-full"
-          >
-            ➕ Agregar nuevo dato personal
-          </Button>
+          {!pacienteAEditar && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDatoPersonalAEditar(null)
+                setAbrirModalDato(true)
+              }}
+              disabled={datoSeleccionado !== null}
+              className="mt-2 w-full"
+            >
+              ➕ Agregar nuevo dato personal
+            </Button>
+          )}
+
+          {pacienteAEditar && datoSeleccionado && (
+            <Button
+              variant="outline"
+              onClick={handleEditarDatoPersonal}
+              className="mt-2 w-full"
+            >
+              ✏️ Editar datos personales
+            </Button>
+          )}
 
           {datoSeleccionado && (
             <>
@@ -310,7 +350,7 @@ export default function PacienteModal({ open, onClose }) {
                 : "bg-gray-400 cursor-not-allowed"
             } text-white`}
           >
-            {guardando ? "⏳ Guardando..." : "💾 Guardar"}
+            {guardando ? "⏳ Guardando..." : `💾 ${pacienteAEditar ? 'Actualizar' : 'Guardar'}`}
           </Button>
 
           {mensaje && (
@@ -326,7 +366,15 @@ export default function PacienteModal({ open, onClose }) {
           )}
         </div>
       </DialogContent>
-      <DatoPersonalModal open={abrirModalDato} onClose={() => setAbrirModalDato(false)} onGuardado={fetchDatos}/>
+      <DatoPersonalModal 
+        open={abrirModalDato} 
+        onClose={() => {
+          setAbrirModalDato(false)
+          setDatoPersonalAEditar(null)
+        }} 
+        onGuardado={handleDatoPersonalGuardado} 
+        datoAEditar={datoPersonalAEditar}
+      />
     </Dialog>
   )
 }
